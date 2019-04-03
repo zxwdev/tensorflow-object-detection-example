@@ -17,7 +17,8 @@
 
 
 import base64
-import cStringIO
+#import cStringIO
+from io import StringIO, BytesIO
 import sys
 import tempfile
 
@@ -122,7 +123,7 @@ class ObjectDetector(object):
     boxes, scores, classes, num_detections = map(
         np.squeeze, [boxes, scores, classes, num_detections])
 
-    return boxes, scores, classes.astype(int), num_detections
+    return boxes, scores, classes.astype(int), num_detections.astype(int)
 
 
 def draw_bounding_box_on_image(image, box, color='red', thickness=4):
@@ -136,10 +137,10 @@ def draw_bounding_box_on_image(image, box, color='red', thickness=4):
 
 
 def encode_image(image):
-  image_buffer = cStringIO.StringIO()
+  image_buffer = BytesIO() #cStringIO.StringIO()
   image.save(image_buffer, format='PNG')
   imgstr = 'data:image/png;base64,{:s}'.format(
-      base64.b64encode(image_buffer.getvalue()))
+      base64.b64encode(image_buffer.getvalue()).decode())
   return imgstr
 
 
@@ -147,7 +148,7 @@ def detect_objects(image_path):
   image = Image.open(image_path).convert('RGB')
   boxes, scores, classes, num_detections = client.detect(image)
   image.thumbnail((480, 480), Image.ANTIALIAS)
-
+  
   new_images = {}
   for i in range(num_detections):
     if scores[i] < 0.7: continue
@@ -160,7 +161,7 @@ def detect_objects(image_path):
   result = {}
   result['original'] = encode_image(image.copy())
 
-  for cls, new_image in new_images.iteritems():
+  for cls, new_image in new_images.items():
     category = client.category_index[cls]['name']
     result[category] = encode_image(new_image)
 
@@ -193,4 +194,4 @@ client = ObjectDetector()
 
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=80, debug=False)
+  app.run(host='0.0.0.0', port=7770, debug=True)
