@@ -47,7 +47,7 @@
         <p>
           <a href="javascript:void(0);" onclick="ChangePhoto('original');">original</a>
           </br>
-          {% for name, img in result.iteritems() %}
+          {% for name, img in result.items() %}
             {% if name != 'original' %}
               <a href="javascript:void(0);"
                  onclick="ChangePhoto('{{ name }}', '{{ result[ name ] }}');">{{ name }}</a>
